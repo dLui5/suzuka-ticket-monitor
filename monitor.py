@@ -43,7 +43,7 @@ def check(state, target, quantity, notifier, now, fetch=fetch_slots):
     current = [f"{s.id}/{s.start}/{s.end}" for s in slots]
     new_slots = [s for s, key in zip(slots, current) if key not in previous]
     if new_slots:
-        times = "\n".join(f"• {s.start}–{s.end} Japan time: {s.remaining} remaining" for s in new_slots)
+        times = "\n".join(f"• {s.start}–{s.end} JST: {s.remaining} remaining" for s in new_slots)
         notifier.send(f"🎟 Circuit Challenger tickets available!\n{target} · {quantity} tickets in the same slot\n"
                       f"{times}\n\nBook now: {BOOKING_URL}\nAvailability can change before checkout.")
     state["available"] = current
@@ -51,7 +51,7 @@ def check(state, target, quantity, notifier, now, fetch=fetch_slots):
     if state.get("heartbeat") != hour:
         status = "Tickets are available!!!" if slots else "No tickets."
         notifier.send(f"{status}\n"
-                      f"{now:%Y-%m-%d %H:%M} JPT.\n"
+                      f"{now:%Y-%m-%d %H:%M} JST.\n"
                       )
         state["heartbeat"] = hour
 
