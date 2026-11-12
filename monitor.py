@@ -49,10 +49,10 @@ def check(state, target, quantity, notifier, now, fetch=fetch_slots):
     state["available"] = current
     hour = now.strftime("%Y-%m-%dT%H")
     if state.get("heartbeat") != hour:
-        status = "Matching slots are available." if slots else "No slot currently has the requested quantity."
-        notifier.send(f"Hourly ticket report.\nWatching {target} for {quantity} tickets in one slot.\n"
-                      f"{status}\nChecked {now:%Y-%m-%d %H:%M} Japan time.\n"
-                      "Scheduled checks can be delayed by GitHub.")
+        status = "Tickets are available!!!" if slots else "No tickets."
+        notifier.send(f"{status}\n"
+                      f"{now:%Y-%m-%d %H:%M} JPT.\n"
+                      )
         state["heartbeat"] = hour
 
 
