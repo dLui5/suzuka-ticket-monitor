@@ -47,13 +47,13 @@ def check(state, target, quantity, notifier, now, fetch=fetch_slots):
         notifier.send(f"🎟 Circuit Challenger tickets available!\n{target} · {quantity} tickets in the same slot\n"
                       f"{times}\n\nBook now: {BOOKING_URL}\nAvailability can change before checkout.")
     state["available"] = current
-    today = now.date().isoformat()
-    if state.get("heartbeat") != today:
+    hour = now.strftime("%Y-%m-%dT%H")
+    if state.get("heartbeat") != hour:
         status = "Matching slots are available." if slots else "No slot currently has the requested quantity."
-        notifier.send(f"Ticket monitor is running.\nWatching {target} for {quantity} tickets in one slot.\n"
+        notifier.send(f"Hourly ticket report.\nWatching {target} for {quantity} tickets in one slot.\n"
                       f"{status}\nChecked {now:%Y-%m-%d %H:%M} Japan time.\n"
                       "Scheduled checks can be delayed by GitHub.")
-        state["heartbeat"] = today
+        state["heartbeat"] = hour
 
 
 def load_state(path):

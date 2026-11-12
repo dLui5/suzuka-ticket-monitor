@@ -25,6 +25,16 @@ If setup fails, paste only the token itself (`digits:letters`), without a `bot` 
 
 If you copied the exact token but the hidden prompt rejects it, copy the token again and run `python3 setup_telegram.py --clipboard` on your Mac. This reads directly from the clipboard, bypassing terminal paste handling, and never prints or saves the token. Format errors now identify empty input, terminal paste markers, or unexpected Unicode characters without displaying the token itself.
 
+## Send alerts to a shared Telegram group
+
+1. Create a Telegram group with everyone who should receive alerts.
+2. Copy your existing BotFather token, then run `python3 setup_telegram.py --clipboard --group` on your Mac.
+3. Open the printed link and select the group to add the bot. Ensure the exact `/start@YourBot ...` command printed by setup appears in the group; send it yourself if necessary. This uses Telegram's [group deep linking](https://core.telegram.org/bots/features#deep-linking).
+4. Return to the terminal and press Enter. Setup sends a test message to the group and prints its `TELEGRAM_CHAT_ID`.
+5. In your GitHub repository, open **Settings → Secrets and variables → Actions**, edit **TELEGRAM_CHAT_ID**, and replace its value with the group ID, including the leading minus sign. Keep your existing **TELEGRAM_BOT_TOKEN**.
+
+Subsequent monitor runs use the group as their notification destination. You and your friend receive alerts in that group rather than separate private chats. The test message confirms group delivery; normal runs still suppress duplicate alerts and this hour's report may already have been sent. A code push is not needed to change the destination secret. The bot must remain in the group and be allowed to send messages.
+
 ## 2. Put this project on GitHub
 
 1. Create a new **public** GitHub repository, for example `suzuka-ticket-monitor`.
@@ -43,7 +53,7 @@ No website, credit card, database service, or Asoview login is needed for this i
 - Alert when a slot first has at least two tickets; include the time, reported stock, and booking link.
 - Suppress repeat alerts while the same slot remains available, including stock count fluctuations.
 - Alert again if a slot becomes unavailable and later reopens.
-- Send a confirmation on the first successful check each Japan calendar day.
+- Send a status report on the first successful check of each clock hour in Japan. Reports include whether matching tickets are available; delivery follows the next successful run, rather than occurring at an exact minute. Failed report deliveries are retried on subsequent checks.
 - Warn after three consecutive failed availability checks, then send a recovery message when checks succeed again. Failed requests and unexpected data are never treated as sold-out results.
 - Retry failed Telegram deliveries on a later run. A crash after Telegram accepts an alert but before history is saved can cause a duplicate; delivery and Git persistence cannot be one atomic operation.
 - Stop polling Asoview after 25 November ends in Japan and send one completion message. **Disable the workflow** from its Actions menu afterward to stop scheduled GitHub runs.

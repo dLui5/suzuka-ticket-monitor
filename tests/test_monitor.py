@@ -56,7 +56,7 @@ class MonitorTests(unittest.TestCase):
 
     def test_dedup_restock_and_quantity_fluctuations(self):
         self.run_check()
-        self.assertEqual(len(self.notifier.messages), 2)  # Alert and daily confirmation.
+        self.assertEqual(len(self.notifier.messages), 2)  # Alert and hourly report.
         self.slots = [Slot("02", "12:20", "12:30", 11)]
         self.run_check()
         self.assertEqual(len(self.notifier.messages), 2)
@@ -89,15 +89,37 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(sum("recovered" in x for x in self.notifier.messages), 1)
         self.assertEqual(sum("tickets available" in x for x in self.notifier.messages), 1)
 
-    def test_daily_heartbeat_and_expiration(self):
+    def test_hourly_report_and_expiration(self):
         self.run_check(slots=[])
-        self.now = datetime(2026, 11, 11, 0, tzinfo=JST)
+        self.assertIn("Hourly ticket report", self.notifier.messages[0])
+        self.now = datetime(2026, 11, 10, 12, 55, tzinfo=JST)
+        self.run_check(slots=[])
+        self.assertEqual(len(self.notifier.messages), 1)
+        self.now = datetime(2026, 11, 10, 13, 5, tzinfo=JST)
+        self.run_check(slots=[])
         self.run_check(slots=[])
         self.assertEqual(len(self.notifier.messages), 2)
+        self.now = datetime(2026, 11, 11, 0, tzinfo=JST)
+        self.run_check(slots=[])
+        self.assertEqual(len(self.notifier.messages), 3)
         self.now = datetime(2026, 11, 26, 0, tzinfo=JST)
         self.run_check(fetch=lambda *_: self.fail("Expired date must not be polled"))
         self.run_check(fetch=lambda *_: self.fail("Expired date must not be polled"))
-        self.assertEqual(len(self.notifier.messages), 3)
+        self.assertEqual(len(self.notifier.messages), 4)
+
+    def test_failed_hourly_report_retries_until_delivered(self):
+        self.run_check(slots=[])
+        previous_hour = self.state["heartbeat"]
+        self.now = datetime(2026, 11, 10, 13, tzinfo=JST)
+        self.notifier.fail = True
+        with self.assertRaises(ServiceError):
+            self.run_check(slots=[])
+        self.assertEqual(self.state["heartbeat"], previous_hour)
+        self.notifier.fail = False
+        self.run_check(slots=[])
+        self.run_check(slots=[])
+        self.assertEqual(len(self.notifier.messages), 2)
+        self.assertEqual(self.state["heartbeat"], "2026-11-10T13")
 
     def test_state_survives_restart(self):
         self.run_check()
