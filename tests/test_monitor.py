@@ -54,6 +54,27 @@ class MonitorTests(unittest.TestCase):
             with self.assertRaises(ServiceError):
                 available_slots(bad, 2)
 
+    def test_one_remaining_ticket_triggers_alert_with_new_watch_quantity(self):
+        self.run_check(slots=[])
+        course = json.loads((Path(__file__).parent / "fixtures" / "nov26.json").read_text())[1]
+        course["remainReserveNumber"] = 1
+
+        def fetch(target, quantity):
+            self.assertEqual(target, "2026-11-25")
+            return available_slots([course], quantity)
+
+        self.assertEqual(fetch("2026-11-25", 2), [])
+        self.notifier.messages.clear()
+        check(self.state, "2026-11-25", 1, self.notifier, self.now, fetch)
+        alerts = [m for m in self.notifier.messages if "tickets available" in m]
+        self.assertEqual(len(alerts), 1)
+        self.assertIn("1 remaining", alerts[0])
+        self.assertIn("minimum 1 ticket per slot", alerts[0])
+        self.assertEqual(self.state["watch"], "2026-11-25/1")
+        count = len(self.notifier.messages)
+        check(self.state, "2026-11-25", 1, self.notifier, self.now, fetch)
+        self.assertEqual(len(self.notifier.messages), count)
+
     def test_dedup_restock_and_quantity_fluctuations(self):
         self.run_check()
         self.assertEqual(len(self.notifier.messages), 2)  # Alert and hourly report.
@@ -91,7 +112,7 @@ class MonitorTests(unittest.TestCase):
 
     def test_hourly_report_and_expiration(self):
         self.run_check(slots=[])
-        self.assertIn("Hourly ticket report", self.notifier.messages[0])
+        self.assertIn("No tickets.", self.notifier.messages[0])
         self.now = datetime(2026, 11, 10, 12, 55, tzinfo=JST)
         self.run_check(slots=[])
         self.assertEqual(len(self.notifier.messages), 1)

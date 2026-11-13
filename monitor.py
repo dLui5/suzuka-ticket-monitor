@@ -44,7 +44,7 @@ def check(state, target, quantity, notifier, now, fetch=fetch_slots):
     new_slots = [s for s, key in zip(slots, current) if key not in previous]
     if new_slots:
         times = "\n".join(f"• {s.start}–{s.end} JST: {s.remaining} remaining" for s in new_slots)
-        notifier.send(f"🎟 Circuit Challenger tickets available!\n{target} · {quantity} tickets in the same slot\n"
+        notifier.send(f"🎟 Circuit Challenger tickets available!\n{target} · minimum {quantity} ticket{'s' if quantity != 1 else ''} per slot\n"
                       f"{times}\n\nBook now: {BOOKING_URL}\nAvailability can change before checkout.")
     state["available"] = current
     hour = now.strftime("%Y-%m-%dT%H")
@@ -77,7 +77,7 @@ def main():
     args = parser.parse_args()
     target = os.environ.get("TARGET_DATE", "2026-11-25")
     date.fromisoformat(target)
-    quantity = int(os.environ.get("TICKET_QUANTITY", "2"))
+    quantity = int(os.environ.get("TICKET_QUANTITY", "1"))
     if quantity < 1:
         raise ValueError("TICKET_QUANTITY must be positive")
     if args.dry_run:

@@ -27,7 +27,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TARGET_DATE: '2026-11-25'
-          TICKET_QUANTITY: '2'
+          TICKET_QUANTITY: '1'
         run: python3 monitor.py
       - name: Save alert history
         if: always() && steps.restore.outcome == 'success'

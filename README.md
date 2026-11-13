@@ -1,8 +1,8 @@
 # Circuit Challenger ticket monitor
 
-Watches **25 November 2026 for 2 tickets in the same time slot**, at any time of day (Japan time), and sends Telegram notifications. The ticket is Suzuka Circuit's [Circuit Challenger, East Course](https://www.asoview.com/item/ticket/ticket0000007351/), plan `ticket0000007351`.
+Watches **25 November 2026 for any available tickets (at least one ticket in any time slot)**, at any time of day (Japan time), and sends Telegram notifications. The ticket is Suzuka Circuit's [Circuit Challenger, East Course](https://www.asoview.com/item/ticket/ticket0000007351/), plan `ticket0000007351`.
 
-**One ticket is one kart**, per the product's `1台` purchase category. Two tickets means two karts. If you mean two people sharing one kart, check the attraction's occupancy rules and change `TICKET_QUANTITY` accordingly.
+**One ticket is one kart**, per the product's `1台` purchase category. Check the attraction's occupancy rules if you plan to share a kart.
 
 ## Free hosting: GitHub Actions
 
@@ -50,7 +50,7 @@ No website, credit card, database service, or Asoview login is needed for this i
 
 ## Notifications
 
-- Alert when a slot first has at least two tickets; include the time, reported stock, and booking link.
+- Alert when a slot first has at least one ticket; include the time, reported stock, and booking link.
 - Suppress repeat alerts while the same slot remains available, including stock count fluctuations.
 - Alert again if a slot becomes unavailable and later reopens.
 - Send a status report on the first successful check of each clock hour in Japan. Reports include whether matching tickets are available; delivery follows the next successful run, rather than occurring at an exact minute. Failed report deliveries are retried on subsequent checks.
