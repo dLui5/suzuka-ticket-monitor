@@ -1,7 +1,5 @@
 {
-  "available": [
-    "02/12:20/12:30"
-  ],
+  "available": [],
   "failures": 0,
   "heartbeat": "2026-11-24T19",
   "watch": "2026-11-25/1"
